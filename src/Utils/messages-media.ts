@@ -20,7 +20,7 @@ import { ILogger } from './logger'
 const getTmpFilesDirectory = () => tmpdir()
 
 const getImageProcessingLibrary = async() => {
-	const [_jimp, sharp] = await Promise.all([
+	const [_jimp] = await Promise.all([
 		(async() => {
 			const jimp = await (
 				import('jimp')
@@ -28,18 +28,18 @@ const getImageProcessingLibrary = async() => {
 			)
 			return jimp
 		})(),
-		(async() => {
+		/*(async() => {
 			const sharp = await (
 				import('sharp')
 					.catch(() => { })
 			)
 			return sharp
-		})()
+		})()*/
 	])
 
-	if(sharp) {
+	/*if(sharp) {
 		return { sharp }
-	}
+	}*/
 
 	const jimp = _jimp?.default || _jimp
 	if(jimp) {
@@ -96,7 +96,7 @@ export const extractImageThumb = async(bufferOrFilePath: Readable | Buffer | str
 	}
 
 	const lib = await getImageProcessingLibrary()
-	if('sharp' in lib && typeof lib.sharp?.default === 'function') {
+	/*if('sharp' in lib && typeof lib.sharp?.default === 'function') {
 		const img = lib.sharp.default(bufferOrFilePath)
 		const dimensions = await img.metadata()
 
@@ -111,7 +111,7 @@ export const extractImageThumb = async(bufferOrFilePath: Readable | Buffer | str
 				height: dimensions.height,
 			},
 		}
-	} else if('jimp' in lib && typeof lib.jimp?.read === 'function') {
+	} else*/ if('jimp' in lib && typeof lib.jimp?.read === 'function') {
 		const { read, MIME_JPEG, RESIZE_BILINEAR, AUTO } = lib.jimp
 
 		const jimp = await read(bufferOrFilePath as string)
@@ -153,14 +153,14 @@ export const generateProfilePicture = async(mediaUpload: WAMediaUpload) => {
 
 	const lib = await getImageProcessingLibrary()
 	let img: Promise<Buffer>
-	if('sharp' in lib && typeof lib.sharp?.default === 'function') {
+	/*if('sharp' in lib && typeof lib.sharp?.default === 'function') {
 		img = lib.sharp.default(bufferOrFilePath)
 			.resize(640, 640)
 			.jpeg({
 				quality: 50,
 			})
 			.toBuffer()
-	} else if('jimp' in lib && typeof lib.jimp?.read === 'function') {
+	} else */if('jimp' in lib && typeof lib.jimp?.read === 'function') {
 		const { read, MIME_JPEG, RESIZE_BILINEAR } = lib.jimp
 		const jimp = await read(bufferOrFilePath as string)
 		const min = Math.min(jimp.getWidth(), jimp.getHeight())

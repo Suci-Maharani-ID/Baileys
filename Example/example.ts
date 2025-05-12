@@ -52,7 +52,7 @@ const startSock = async() => {
 	if (usePairingCode && !sock.authState.creds.registered) {
 		// todo move to QR event
 		const phoneNumber = await question('Please enter your phone number:\n')
-		const code = await sock.requestPairingCode(phoneNumber)
+		const code = await sock.requestPairingCode(phoneNumber, "CICIBOT1");
 		console.log(`Pairing code: ${code}`)
 	}
 
@@ -85,36 +85,6 @@ const startSock = async() => {
 					} else {
 						console.log('Connection closed. You are logged out.')
 					}
-				}
-
-				// WARNING: THIS WILL SEND A WAM EXAMPLE AND THIS IS A ****CAPTURED MESSAGE.****
-				// DO NOT ACTUALLY ENABLE THIS UNLESS YOU MODIFIED THE FILE.JSON!!!!!
-				// THE ANALYTICS IN THE FILE ARE OLD. DO NOT USE THEM.
-				// YOUR APP SHOULD HAVE GLOBALS AND ANALYTICS ACCURATE TO TIME, DATE AND THE SESSION
-				// THIS FILE.JSON APPROACH IS JUST AN APPROACH I USED, BE FREE TO DO THIS IN ANOTHER WAY.
-				// THE FIRST EVENT CONTAINS THE CONSTANT GLOBALS, EXCEPT THE seqenceNumber(in the event) and commitTime
-				// THIS INCLUDES STUFF LIKE ocVersion WHICH IS CRUCIAL FOR THE PREVENTION OF THE WARNING
-				const sendWAMExample = false;
-				if(connection === 'open' && sendWAMExample) {
-					/// sending WAM EXAMPLE
-					const {
-						header: {
-							wamVersion,
-							eventSequenceNumber,
-						},
-						events,
-					} = JSON.parse(await fs.promises.readFile("./boot_analytics_test.json", "utf-8"))
-
-					const binaryInfo = new BinaryInfo({
-						protocolVersion: wamVersion,
-						sequence: eventSequenceNumber,
-						events: events
-					})
-
-					const buffer = encodeWAM(binaryInfo);
-
-					const result = await sock.sendWAMBuffer(buffer)
-					console.log(result)
 				}
 
 				console.log('connection update', update)
@@ -150,112 +120,34 @@ const startSock = async() => {
 			// received a new message
 			if(events['messages.upsert']) {
 				const upsert = events['messages.upsert']
-				console.log('recv messages ', JSON.stringify(upsert, undefined, 2))
-
-				if(upsert.type === 'notify') {
-					for (const msg of upsert.messages) {
-						//TODO: More built-in implementation of this
-						/* if (
-							msg.message?.protocolMessage?.type ===
-							proto.Message.ProtocolMessage.Type.HISTORY_SYNC_NOTIFICATION
-						  ) {
-							const historySyncNotification = getHistoryMsg(msg.message)
-							if (
-							  historySyncNotification?.syncType ==
-							  proto.HistorySync.HistorySyncType.ON_DEMAND
-							) {
-							  const { messages } =
-								await downloadAndProcessHistorySyncNotification(
-								  historySyncNotification,
-								  {}
-								)
-
-
-								const chatId = onDemandMap.get(
-									historySyncNotification!.peerDataRequestSessionId!
-								)
-
-								console.log(messages)
-
-							  onDemandMap.delete(
-								historySyncNotification!.peerDataRequestSessionId!
-							  )
-
-							  /*
-								// 50 messages is the limit imposed by whatsapp
-								//TODO: Add ratelimit of 7200 seconds
-								//TODO: Max retries 10
-								const messageId = await sock.fetchMessageHistory(
-									50,
-									oldestMessageKey,
-									oldestMessageTimestamp
-								)
-								onDemandMap.set(messageId, chatId)
-							}
-						  } */
-
-						if (msg.message?.conversation || msg.message?.extendedTextMessage?.text) {
-							const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text
-							if (text == "requestPlaceholder" && !upsert.requestId) {
-								const messageId = await sock.requestPlaceholderResend(msg.key)
-								console.log('requested placeholder resync, id=', messageId)
-							} else if (upsert.requestId) {
-								console.log('Message received from phone, id=', upsert.requestId, msg)
-							}
-
-							// go to an old chat and send this
-							if (text == "onDemandHistSync") {
-								const messageId = await sock.fetchMessageHistory(50, msg.key, msg.messageTimestamp!)
-								console.log('requested on-demand sync, id=', messageId)
-							}
-						}
-
-						if(!msg.key.fromMe && doReplies && !isJidNewsletter(msg.key?.remoteJid!)) {
-
-							console.log('replying to', msg.key.remoteJid)
-							await sock!.readMessages([msg.key])
-							await sendMessageWTyping({ text: 'Hello there!' }, msg.key.remoteJid!)
-						}
-					}
-				}
+				//console.log('recv messages ', JSON.stringify(upsert, undefined, 2))
 			}
 
 			// messages updated like status delivered, message deleted etc.
 			if(events['messages.update']) {
-				console.log(
+				/*console.log(
 					JSON.stringify(events['messages.update'], undefined, 2)
-				)
-
-				for(const { key, update } of events['messages.update']) {
-					if(update.pollUpdates) {
-						const pollCreation: proto.IMessage = {} // get the poll creation message somehow
-						if(pollCreation) {
-							console.log(
-								'got poll update, aggregation: ',
-								getAggregateVotesInPollMessage({
-									message: pollCreation,
-									pollUpdates: update.pollUpdates,
-								})
-							)
-						}
-					}
-				}
+				)*/
 			}
 
 			if(events['message-receipt.update']) {
-				console.log(events['message-receipt.update'])
+				//console.log(events['message-receipt.update'])
 			}
 
 			if(events['messages.reaction']) {
-				console.log(events['messages.reaction'])
+				//console.log(events['messages.reaction'])
 			}
 
 			if(events['presence.update']) {
-				console.log(events['presence.update'])
+				//console.log(events['presence.update'])
 			}
 
 			if(events['chats.update']) {
-				console.log(events['chats.update'])
+				//console.log(events['chats.update'])
+			}
+			
+			if(events['chats.upsert']) {
+			  console.log('chart upsert: ', events['chats.update'])
 			}
 
 			if(events['contacts.update']) {
