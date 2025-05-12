@@ -6,6 +6,9 @@
 
 Baileys is a WebSockets-based TypeScript library for interacting with the WhatsApp Web API.
 
+# Install
+npm install github:Syauqi-Ali/Baileys
+
 # Usage
 A new guide has been posted at https://baileys.wiki.
 
