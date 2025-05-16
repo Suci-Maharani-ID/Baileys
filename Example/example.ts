@@ -114,6 +114,7 @@ const startSock = async() => {
 				if (syncType === proto.HistorySync.HistorySyncType.ON_DEMAND) {
 					console.log('received on-demand history sync, messages=', messages)
 				}
+				console.log(chats, contacts, messages)
 				console.log(`recv ${chats.length} chats, ${contacts.length} contacts, ${messages.length} msgs (is latest: ${isLatest}, progress: ${progress}%), type: ${syncType}`)
 			}
 
@@ -147,7 +148,7 @@ const startSock = async() => {
 			}
 			
 			if(events['chats.upsert']) {
-			  console.log('chart upsert: ', events['chats.update'])
+			  //console.log('chart upsert: ', events['chats.update'])
 			}
 
 			if(events['contacts.update']) {
