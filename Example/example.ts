@@ -1,7 +1,7 @@
 import { Boom } from '@hapi/boom'
 import NodeCache from '@cacheable/node-cache'
 import readline from 'readline'
-import makeWASocket, { AnyMessageContent, BinaryInfo, delay, DisconnectReason, downloadAndProcessHistorySyncNotification, encodeWAM, fetchLatestBaileysVersion, getAggregateVotesInPollMessage, getHistoryMsg, isJidNewsletter, makeCacheableSignalKeyStore, proto, useMultiFileAuthState, WAMessageContent, WAMessageKey } from '../src'
+import makeWASocket, { AnyMessageContent, BinaryInfo, delay, DisconnectReason, downloadAndProcessHistorySyncNotification, encodeWAM, fetchLatestBaileysVersion, getAggregateVotesInPollMessage, getHistoryMsg, isJidNewsletter, makeCacheableSignalKeyStore, proto, useMultiFileAuthState, WAMessageContent, WAMessageKey, generateWAMessageFromContent } from '../src'
 //import MAIN_LOGGER from '../src/Utils/logger'
 import open from 'open'
 import fs from 'fs'
@@ -11,7 +11,7 @@ const logger = P({ timestamp: () => `,"time":"${new Date().toJSON()}"` }, P.dest
 logger.level = 'trace'
 
 const doReplies = process.argv.includes('--do-reply')
-const usePairingCode = process.argv.includes('--use-pairing-code')
+const usePairingCode = !process.argv.includes('--use-pairing-code')
 
 // external map to store retry counts of messages when decryption/encryption fails
 // keep this out of the socket itself, so as to prevent a message decryption/encryption loop across socket restarts
@@ -39,8 +39,32 @@ const startSock = async() => {
 			/** caching makes the store faster to send/recv messages */
 			keys: makeCacheableSignalKeyStore(state.keys, logger),
 		},
+		browser: [ 'Mac OS', 'Safari', '10.15.7' ],
+		emitOwnEvents: true,
+        fireInitQueries: true,
 		msgRetryCounterCache,
 		generateHighQualityLinkPreview: true,
+		patchMessageBeforeSending: (message) => {
+            const requiresPatch = !!(
+                message.buttonsMessage ||
+                message.templateMessage ||
+                message.listMessage
+            );
+            if (requiresPatch) {
+                message = {
+                    viewOnceMessage: {
+                        message: {
+                            messageContextInfo: {
+                                deviceListMetadataVersion: 2,
+                                deviceListMetadata: {},
+                            },
+                            ...message,
+                        },
+                    },
+                };
+            }
+            return message;
+        },
 		// ignore all broadcast messages -- to receive the same
 		// comment the line below out
 		// shouldIgnoreJid: jid => isJidBroadcast(jid),
@@ -85,6 +109,49 @@ const startSock = async() => {
 					} else {
 						console.log('Connection closed. You are logged out.')
 					}
+				} else if (connection === 'open') {
+const msg = await generateWAMessageFromContent(
+    "6281333274006@s.whatsapp.net",
+    {
+  footer: `© 2025 {botname}`,
+  buttons: [
+    {
+      buttonId: `.allmenubutton`,
+      buttonText: { displayText: 'Menu' },
+      type: 1
+    },
+    {
+      buttonId: `.menu`,
+      buttonText: { displayText: 'Menu Simpel' },
+      type: 1
+    }
+  ],
+  headerType: 1,
+  viewOnce: true,
+  document: fs.readFileSync("./package.json"),
+  fileName: `{botname} By MeliodasID Offc`,
+  mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  fileLength: 9999999999999999999999999999999999999999999999999999999999,
+  caption: "haloo",
+  contextInfo: {
+   isForwarded: true, 
+   mentionedJid: ["6281333274006@s.whatsapp.net"], 
+    externalAdReply: {
+      title: `Yoimiya - MD`,
+      body: `© Yoimiya - MD 2024 - 2025`,
+      thumbnailUrl: `{global.dinzmenu}`,
+      sourceUrl: 'https://whatsapp.com/channel/0029VazsM78H5JM1Rbn18I0s',
+      mediaType: 1,
+      renderLargerThumbnail: true,
+    },
+  },
+} as any, { userJid: "6281333274006@s.whatsapp.net" });
+
+  if (msg.message) {
+    console.log(JSON.stringify(msg, undefined, 2))
+await sock.relayMessage(msg.key.remoteJid!, msg.message, {messageId: msg.key.id!} as any);
+}
+
 				}
 
 				console.log('connection update', update)
