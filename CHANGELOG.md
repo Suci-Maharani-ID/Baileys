@@ -1,3 +1,7 @@
+## [6.7.20](https://syauqi-ali/compare/v6.7.19...v6.7.20) (2025-05-24)
+
+
+
 ## [6.7.19](https://syauqi-ali/compare/v6.7.18...v6.7.19) (2025-05-24)
 
 
