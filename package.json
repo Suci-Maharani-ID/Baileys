@@ -6,13 +6,13 @@
     "whatsapp",
     "automation"
   ],
-  "homepage": "https://github.com/WhiskeySockets/Baileys/",
+  "homepage": "https://github.com/Syauqi-Ali/Baileys/",
   "repository": {
-    "url": "git@github.com:WhiskeySockets/Baileys.git"
+    "url": "git@Syauqi-Ali/Baileys.git"
   },
   "license": "MIT",
   "author": "Rajeh Taher",
-  "main": "src/index.ts",
+  "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/*",
