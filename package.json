@@ -34,7 +34,6 @@
     "lint:fix": "yarn lint --fix",
     "prepack": "tsc",
     "prepare": "tsc",
-    "preinstall": "node ./engine-requirements.js",
     "release": "release-it"
   },
   "dependencies": {
@@ -87,8 +86,5 @@
       "optional": true
     }
   },
-  "packageManager": "yarn@1.22.19",
-  "engines": {
-    "node": ">=20.0.0"
-  }
+  "packageManager": "yarn@1.22.19"
 }
