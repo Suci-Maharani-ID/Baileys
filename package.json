@@ -35,8 +35,7 @@
     "prepack": "tsc",
     "prepare": "tsc",
     "preinstall": "node ./engine-requirements.js",
-    "release": "release-it",
-    "test": "jest"
+    "release": "release-it"
   },
   "dependencies": {
     "@cacheable/node-cache": "^1.4.0",
@@ -63,7 +62,6 @@
     "link-preview-js": "^3.0.0",
     "open": "^8.4.2",
     "release-it": "^15.10.3",
-    "ts-jest": "^27.0.3",
     "ts-node": "^10.8.1",
     "typedoc": "^0.27.9",
     "typedoc-plugin-markdown": "4.4.2",
