@@ -1,3 +1,13 @@
+## [6.7.19](https://syauqi-ali/compare/v6.7.18...v6.7.19) (2025-05-24)
+
+
+### Bug Fixes
+
+* allow media upload retries ([f58a38f](https://syauqi-ali/commits/f58a38fde96297858f372b5abdbb75bc92c438db))
+* memory blow on large files sending through URL ([bff86ed](https://syauqi-ali/commits/bff86ed4c1fec3f42ed46e6ccbdead378f4107b6))
+
+
+
 ## [6.7.18](https://syauqi-ali/compare/07291d8ef69c886bd1aefb3b474a8b7553daebad...v6.7.18) (2025-05-23)
 
 
