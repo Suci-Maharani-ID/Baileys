@@ -48,6 +48,7 @@
   "devDependencies": {
     "@types/node": "^16.0.0",
     "@types/ws": "^8.0.0",
+    "conventional-changelog-cli": "^5.0.0",
     "eslint": "^8.0.0",
     "jimp": "^0.16.1",
     "link-preview-js": "^3.0.0",
