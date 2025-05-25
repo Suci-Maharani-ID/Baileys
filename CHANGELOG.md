@@ -1,3 +1,7 @@
+# [6.8.0](https://syauqi-ali/compare/v6.7.22...v6.8.0) (2025-05-25)
+
+
+
 ## [6.7.22](https://syauqi-ali/compare/v6.7.21...v6.7.22) (2025-05-25)
 
 
@@ -543,12 +547,9 @@
 * Revert "Update module to latest version  (#926)" (#947) ([1885157](https://syauqi-ali/commits/188515791d8337580c182e890290a34019b13438)), closes [#926](https://syauqi-ali/issues/926) [#947](https://syauqi-ali/issues/947)
 * Revert "Update module to latest version  (#926)" ([4594997](https://syauqi-ali/commits/45949972e173741d5e0b82bc44317e620b861460)), closes [#926](https://syauqi-ali/issues/926)
 * Revert "fix: inefficient method of extracting url from text (#741)" (#748) ([d91967a](https://syauqi-ali/commits/d91967aa1c025f96336dbe8e390ae38ed6845566)), closes [#741](https://syauqi-ali/issues/741) [#748](https://syauqi-ali/issues/748) [#741](https://syauqi-ali/issues/741)
-* Revert "fix: always send key bundle with retry receipt" ([f5af502](https://syauqi-ali/commits/f5af502c19e9bba7f132e0d570876ec1b4962eee))
 * Revert "temp: do not handle dirty account_sync" ([56139b2](https://syauqi-ali/commits/56139b2d0300cca388aff57459283a1c76f58ee3))
 * Revert "chore: disable init queries" ([b3e8b38](https://syauqi-ali/commits/b3e8b38917fa86a0621832ecf743746675d22f62))
 * Revert "chore: add WS ping" ([c4ffb2b](https://syauqi-ali/commits/c4ffb2bfaf4184dcdcfeabdf3b147b0a9e3d4cd2))
-* Revert "feat: resync main app state on first open" ([2cc5cc2](https://syauqi-ali/commits/2cc5cc2dd4424b4aeed700f62b4b59e6a3e3856e))
-* Revert "fix: remove redundant collectionSync" ([85574d1](https://syauqi-ali/commits/85574d1d795f32f75f98dfd9ef52242960c68f2b))
 * example logger ([d9a4dae](https://syauqi-ali/commits/d9a4dae23580444b87384f62d71b4d78fd84df4d))
 
 
