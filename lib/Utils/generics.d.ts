@@ -88,3 +88,9 @@ export declare function trimUndefined(obj: {
     [_: string]: any;
 };
 export declare function bytesToCrockford(buffer: Buffer): string;
+export declare function createSimpleCache(ttlMs?: number): {
+    get: <T>(key: string) => T | undefined;
+    set: (key: string, value: any) => void;
+    del: (key: string) => void;
+    flushAll: () => void;
+};

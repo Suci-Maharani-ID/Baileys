@@ -1,9 +1,8 @@
-import NodeCache from '@cacheable/node-cache'
 import { randomBytes } from 'crypto'
 import { DEFAULT_CACHE_TTLS } from '../Defaults'
 import type { AuthenticationCreds, CacheStore, SignalDataSet, SignalDataTypeMap, SignalKeyStore, SignalKeyStoreWithTransaction, TransactionCapabilityOptions } from '../Types'
 import { Curve, signedKeyPair } from './crypto'
-import { delay, generateRegistrationId } from './generics'
+import { delay, generateRegistrationId, createSimpleCache } from './generics'
 import { ILogger } from './logger'
 
 /**
@@ -17,11 +16,7 @@ export function makeCacheableSignalKeyStore(
 	logger?: ILogger,
 	_cache?: CacheStore
 ): SignalKeyStore {
-	const cache = _cache || new NodeCache({
-		stdTTL: DEFAULT_CACHE_TTLS.SIGNAL_STORE, // 5 minutes
-		useClones: false,
-		deleteOnExpire: true,
-	})
+	const cache = _cache || createSimpleCache(DEFAULT_CACHE_TTLS.SIGNAL_STORE)
 
 	function getUniqueId(type: string, id: string) {
 		return `${type}.${id}`

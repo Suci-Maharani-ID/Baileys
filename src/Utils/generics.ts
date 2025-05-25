@@ -450,3 +450,41 @@ export function bytesToCrockford(buffer: Buffer): string {
 
 	return crockford.join('')
 }
+
+export function createSimpleCache(ttlMs: number = 5 * 60 * 1000) {
+  const store = new Map<string, { value: any, expires: number }>()
+
+  const get = <T>(key: string): T | undefined => {
+    const entry = store.get(key)
+    if (!entry) return undefined
+    if (Date.now() > entry.expires) {
+      store.delete(key)
+      return undefined
+    }
+    return entry.value
+  }
+
+  const set = (key: string, value: any) => {
+    store.set(key, { value, expires: Date.now() + ttlMs })
+  }
+  
+  const del = (key: string) => {
+    store.delete(key)
+  }
+
+  const flushAll = () => {
+    store.clear()
+  }
+
+  // optional: automatic cleanup
+  setInterval(() => {
+    const now = Date.now()
+    for (const [key, entry] of store.entries()) {
+      if (now > entry.expires) {
+        store.delete(key)
+      }
+    }
+  }, ttlMs)
+
+  return { get, set, del, flushAll }
+}

@@ -1,5 +1,4 @@
 
-import NodeCache from '@cacheable/node-cache'
 import { Boom } from '@hapi/boom'
 import { randomBytes } from 'crypto'
 import Long = require('long');
@@ -27,7 +26,8 @@ import {
 	NO_MESSAGE_FOUND_ERROR_TEXT,
 	unixTimestampSeconds,
 	xmppPreKey,
-	xmppSignedPreKey
+	xmppSignedPreKey,
+	createSimpleCache
 } from '../Utils'
 import { makeMutex } from '../Utils/make-mutex'
 import {
@@ -76,19 +76,11 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 	/** this mutex ensures that each retryRequest will wait for the previous one to finish */
 	const retryMutex = makeMutex()
 
-	const msgRetryCache = config.msgRetryCounterCache || new NodeCache({
-		stdTTL: DEFAULT_CACHE_TTLS.MSG_RETRY, // 1 hour
-		useClones: false
-	})
-	const callOfferCache = config.callOfferCache || new NodeCache({
-		stdTTL: DEFAULT_CACHE_TTLS.CALL_OFFER, // 5 mins
-		useClones: false
-	})
+	const msgRetryCache = config.msgRetryCounterCache || createSimpleCache(DEFAULT_CACHE_TTLS.MSG_RETRY)
 
-	const placeholderResendCache = config.placeholderResendCache || new NodeCache({
-		stdTTL: DEFAULT_CACHE_TTLS.MSG_RETRY, // 1 hour
-		useClones: false
-	})
+	const callOfferCache = config.callOfferCache || createSimpleCache(DEFAULT_CACHE_TTLS.CALL_OFFER)
+
+	const placeholderResendCache = config.placeholderResendCache || createSimpleCache(DEFAULT_CACHE_TTLS.MSG_RETRY)
 
 	let sendActiveReceipts = false
 
