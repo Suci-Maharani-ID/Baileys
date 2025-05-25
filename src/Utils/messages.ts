@@ -421,21 +421,49 @@ export const generateWAMessageContent = async(
 		m.messageContextInfo.messageAddOnDurationInSecs = message.type === 1 ? message.time || 86400 : 0
 	} else if('buttonReply' in message) {
 		switch (message.type) {
-		case 'template':
-			m.templateButtonReplyMessage = {
-				selectedDisplayText: message.buttonReply.displayText,
-				selectedId: message.buttonReply.id,
-				selectedIndex: message.buttonReply.index,
-			}
-			break
-		case 'plain':
-			m.buttonsResponseMessage = {
-				selectedButtonId: message.buttonReply.id,
-				selectedDisplayText: message.buttonReply.displayText,
-				type: proto.Message.ButtonsResponseMessage.Type.DISPLAY_TEXT,
-			}
-			break
+		    case 'list':
+                m.listResponseMessage = {
+                    title: message.buttonReply.title,
+                    description: message.buttonReply.description,
+                    singleSelectReply: {
+                    	selectedRowId: message.buttonReply.rowId
+                    }, 
+                    listType: proto.Message.ListResponseMessage.ListType.SINGLE_SELECT
+                }
+                break
+            case 'template':
+                m.templateButtonReplyMessage = {
+                    selectedDisplayText: message.buttonReply.displayText,
+                    selectedId: message.buttonReply.id,
+                    selectedIndex: message.buttonReply.index
+                }
+                break
+		    case 'plain':
+			    m.buttonsResponseMessage = {
+				    selectedButtonId: message.buttonReply.id,
+				    selectedDisplayText: message.buttonReply.displayText,
+				    type: proto.Message.ButtonsResponseMessage.Type.DISPLAY_TEXT,
+			    }
+			    break
+			case 'interactive':
+                m.interactiveResponseMessage = {
+                    body: {
+                       text: message.buttonReply.displayText,
+                       format: proto.Message.InteractiveResponseMessage.Body.Format.EXTENSIONS_1 
+                    }, 
+                    nativeFlowResponseMessage: {
+                    	name: message.buttonReply.nativeFlows.name, 
+                        paramsJson: message.buttonReply.nativeFlows.paramsJson, 
+                        version: message.buttonReply.nativeFlows.version
+                    }
+                }
+                break
 		}
+		
+		m.messageContextInfo = {
+            messageSecret: randomBytes(32)
+        }
+        
 	} else if('ptv' in message && message.ptv) {
 		const { videoMessage } = await prepareWAMessageMedia(
 			{ video: message.video },
@@ -504,11 +532,90 @@ export const generateWAMessageContent = async(
 	} else if('requestPhoneNumber' in message) {
 		m.requestPhoneNumberMessage = {}
 	} else {
-		m = await prepareWAMessageMedia(
+		const _m = await prepareWAMessageMedia(
 			message,
 			options
 		)
+		const [type] = Object.keys(_m) 
+        
+        if ('contextInfo' in message || 'mentions' in message) {
+             _m[type].contextInfo = {
+                 ...(message.contextInfo || {}),
+                 ...('mentions' in message ? { mentionedJid: message.mentions || "" } : {})
+            };
+        }
+        
+        _m.messageContextInfo = {
+            messageSecret: randomBytes(32)
+        } 
+        
+        m = _m
 	}
+	
+	if ('sections' in message && !!message.sections) {
+        const listMessage: any = {
+            title: message.title, 
+            buttonText: message.buttonText, 
+            footerText: message.footer, 
+            description: 'text' in message ? message.text : "",
+            sections: message.sections, 
+            listType: proto.Message.ListMessage.ListType.SINGLE_SELECT
+        }
+        
+        listMessage.contextInfo = {
+            ...(message.contextInfo || {}),
+            ...(message.mentions ? { mentionedJid: message.mentions } : {})
+        }
+        
+        m = { listMessage }
+        
+        m.messageContextInfo = {
+            messageSecret: randomBytes(32)
+        } 
+    }
+    
+    else if ('buttons' in message && !!message.buttons) {        
+        const buttonsMessage: any = {
+            buttons: message.buttons.map(b => ({ ...b, type: proto.Message.ButtonsMessage.Button.Type.RESPONSE }))
+        }
+        
+        if ('text' in message) {
+            buttonsMessage.contentText = message.text
+            buttonsMessage.headerType = proto.Message.ButtonsMessage.HeaderType.EMPTY
+        }
+        
+        else {
+            if ('caption' in message) {
+                buttonsMessage.contentText = message.caption
+            }
+            
+            const type = Object.keys(m)[0].replace('Message', '').toUpperCase()
+            
+            buttonsMessage.headerType = proto.Message.ButtonsMessage.HeaderType[type]
+            
+            Object.assign(buttonsMessage, m)
+        }
+        
+        if ('footer' in message && !!message.footer) {
+            buttonsMessage.footerText = message.footer
+        }
+        
+        if ('title' in message && !!message.title) {
+        	buttonsMessage.text = message.title
+            buttonsMessage.headerType = proto.Message.ButtonsMessage.HeaderType.TEXT
+        }
+        
+        buttonsMessage.contextInfo = {
+            ...(message.contextInfo || {}),
+            ...(message.mentions ? { mentionedJid: message.mentions } : {})
+        }
+        
+        m = { buttonsMessage }
+        
+        m.messageContextInfo = {
+            messageSecret: randomBytes(32)
+        } 
+    }
 
 	if('viewOnce' in message && !!message.viewOnce) {
 		m = { viewOnceMessage: { message: m } }
@@ -930,3 +1037,30 @@ export const assertMediaContent = (content: proto.IMessage | null | undefined) =
 
 	return mediaContent
 }
+
+/**
+ * This is an experimental patch to make buttons work.
+ * Don't know how it works, but it does for now.
+ */
+export const patchMessageForMdIfRequired = (message: proto.IMessage | undefined): proto.IMessage | undefined => {
+  if (
+    message?.buttonsMessage ||
+    message?.templateMessage ||
+    message?.listMessage ||
+    message?.interactiveMessage?.nativeFlowMessage
+  ) {
+    message = {
+      viewOnceMessageV2Extension: {
+        message: {
+          messageContextInfo: {
+            deviceListMetadataVersion: 2,
+            deviceListMetadata: {},
+          },
+          ...message,
+        },
+      },
+    };
+  }
+
+  return message;
+};

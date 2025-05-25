@@ -471,6 +471,15 @@ message BotProgressIndicatorMetadata {
 
 }
 
+message BotPromotionMessageMetadata {
+    optional BotPromotionType promotionType = 1;
+    optional string buttonTitle = 2;
+    enum BotPromotionType {
+        UNKNOWN_TYPE = 0;
+        C50 = 1;
+    }
+}
+
 message BotPromptSuggestion {
     optional string prompt = 1;
     optional string promptId = 2;
@@ -2387,6 +2396,23 @@ message Message {
             NOVI = 2;
             UPI = 3;
         }
+    }
+    
+    message PaymentLinkMetadata {
+        optional PaymentLinkButton button = 1;
+        optional PaymentLinkHeader header = 2;
+        message PaymentLinkButton {
+            optional string displayText = 1;
+        }
+        
+        message PaymentLinkHeader {
+            optional PaymentLinkHeaderType headerType = 1;
+            enum PaymentLinkHeaderType {
+                LINK_PREVIEW = 0;
+                ORDER = 1;
+            }
+        }
+        
     }
 
     message PeerDataOperationRequestMessage {

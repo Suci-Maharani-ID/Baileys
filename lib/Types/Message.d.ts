@@ -43,6 +43,15 @@ export type MediaConnInfo = {
     }[];
     fetchDate: Date;
 };
+export interface Carousel {
+    image?: WAMediaUpload;
+    video?: WAMediaUpload;
+    product?: WASendableProduct;
+    title?: string;
+    body?: string;
+    footer?: string;
+    buttons?: proto.Message.InteractiveMessage.NativeFlowMessage.NativeFlowButton[];
+}
 export interface WAUrlInfo {
     'canonical-url': string;
     'matched-text': string;
@@ -62,6 +71,59 @@ type Contextable = {
 };
 type ViewOnce = {
     viewOnce?: boolean;
+};
+type ViewOnceV2 = {
+    viewOnceV2?: boolean;
+};
+type ViewOnceV2Ext = {
+    viewOnceV2Ext?: boolean;
+};
+type Buttonable = {
+    /** add buttons to the message  */
+    buttons?: proto.Message.ButtonsMessage.IButton[];
+};
+type Templatable = {
+    /** add buttons to the message (conflicts with normal buttons)*/
+    templateButtons?: proto.IHydratedTemplateButton[];
+    footer?: string;
+};
+type Interactiveable = {
+    /** add buttons to the message (conflicts with normal buttons)*/
+    interactiveButtons?: proto.Message.InteractiveMessage.NativeFlowMessage.INativeFlowButton[];
+    title?: string;
+    subtitle?: string;
+    footer?: string;
+    hasMediaAttachment?: boolean;
+};
+type Shopable = {
+    shop?: proto.Message.InteractiveMessage.ShopMessage;
+    title?: string;
+    subtitle?: string;
+    footer?: string;
+    hasMediaAttachment?: boolean;
+};
+type Collectionable = {
+    collection?: proto.Message.InteractiveMessage.CollectionMessage;
+    title?: string;
+    subtitle?: string;
+    footer?: string;
+    hasMediaAttachment?: boolean;
+};
+type Listable = {
+    /** Sections of the List */
+    sections?: proto.Message.ListMessage.ISection[];
+    /** Title of a List Message only */
+    title?: string;
+    /** Text of the button on the list (required) */
+    buttonText?: string;
+    /** ListType of a List Message only */
+    listType?: proto.Message.ListMessage.ListType;
+};
+type Cardsable = {
+    cards?: Carousel[];
+    title?: string;
+    subtitle?: string;
+    footer?: string;
 };
 type Editable = {
     edit?: WAMessageKey;
@@ -117,6 +179,14 @@ export type ButtonReplyInfo = {
     displayText: string;
     id: string;
     index: number;
+    title: string;
+    description: string;
+    rowId: string;
+    nativeFlows: {
+        name: string;
+        paramsJson: string;
+        version: number;
+    };
 };
 export type GroupInviteInfo = {
     inviteCode: string;
@@ -131,9 +201,9 @@ export type WASendableProduct = Omit<proto.Message.ProductMessage.IProductSnapsh
 export type AnyRegularMessageContent = (({
     text: string;
     linkPreview?: WAUrlInfo | null;
-} & Mentionable & Contextable & Editable) | AnyMediaMessageContent | ({
+} & Mentionable & Contextable & Buttonable & Templatable & Interactiveable & Shopable & Collectionable & Cardsable & Listable & Editable & WithDimensions) | AnyMediaMessageContent | ({
     poll: PollMessageOptions;
-} & Mentionable & Contextable & Editable) | {
+} & Mentionable & Contextable & Buttonable & Templatable & Interactiveable & Shopable & Collectionable & Cardsable & Listable & Editable & WithDimensions) | {
     contacts: {
         displayName?: string;
         contacts: proto.Message.IContactMessage[];
@@ -144,7 +214,7 @@ export type AnyRegularMessageContent = (({
     react: proto.Message.IReactionMessage;
 } | {
     buttonReply: ButtonReplyInfo;
-    type: 'template' | 'plain';
+    type: 'template' | 'plain' | 'list' | 'interactive';
 } | {
     groupInvite: GroupInviteInfo;
 } | {
@@ -161,7 +231,7 @@ export type AnyRegularMessageContent = (({
     businessOwnerJid?: string;
     body?: string;
     footer?: string;
-} | SharePhoneNumber | RequestPhoneNumber) & ViewOnce;
+} | SharePhoneNumber | RequestPhoneNumber) & ViewOnce & ViewOnceV2 & ViewOnceV2Ext;
 export type AnyMessageContent = AnyRegularMessageContent | {
     forward: WAMessage;
     force?: boolean;

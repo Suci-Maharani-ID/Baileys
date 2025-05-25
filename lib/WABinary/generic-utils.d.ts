@@ -12,3 +12,4 @@ export declare const reduceBinaryNodeToDictionary: (node: BinaryNode, tag: strin
 };
 export declare const getBinaryNodeMessages: ({ content }: BinaryNode) => proto.WebMessageInfo[];
 export declare function binaryNodeToString(node: BinaryNode | BinaryNode['content'], i?: number): any;
+export declare const getBinaryFilteredButtons: (nodeContent: any) => boolean;

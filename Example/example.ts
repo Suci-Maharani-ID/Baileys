@@ -204,6 +204,24 @@ const startSock = async() => {
 								const messageId = await sock.fetchMessageHistory(50, msg.key, msg.messageTimestamp!)
 								console.log('requested on-demand sync, id=', messageId)
 							}
+							
+							/*if (text == "test") {
+							    sock.sendMessage(msg.key.remoteJid, {
+                                    text: "Hello World!!",
+                                    footer: "footer",
+                                    buttons: [
+                                        {
+                                            buttonId: `id`, 
+                                            buttonText: {
+                                                displayText: 'text'
+                                            },
+                                            type: 1 
+                                        }
+                                    ],
+                                    headerType: 1,
+                                    viewOnce: true
+                                },{ quoted: msg })
+							}*/
 						}
 
 						if(!msg.key.fromMe && doReplies && !isJidNewsletter(msg.key?.remoteJid!)) {

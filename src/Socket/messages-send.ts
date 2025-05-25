@@ -4,7 +4,7 @@ import { DEFAULT_CACHE_TTLS, WA_DEFAULT_EPHEMERAL } from '../Defaults'
 import { AnyMessageContent, MediaConnInfo, MessageReceiptType, MessageRelayOptions, MiscMessageGenerationOptions, SocketConfig, WAMessageKey } from '../Types'
 import { aggregateMessageKeysNotFromMe, assertMediaContent, bindWaitForEvent, decryptMediaRetryData, encodeSignedDeviceIdentity, encodeWAMessage, encryptMediaRetryRequest, extractDeviceJids, generateMessageIDV2, generateWAMessage, getStatusCodeForMediaRetry, getUrlFromDirectPath, getWAUploadToServer, normalizeMessageContent, parseAndInjectE2ESessions, unixTimestampSeconds, createSimpleCache } from '../Utils'
 import { getUrlInfo } from '../Utils/link-preview'
-import { areJidsSameUser, BinaryNode, BinaryNodeAttributes, getBinaryNodeChild, getBinaryNodeChildren, isJidGroup, isJidUser, jidDecode, jidEncode, jidNormalizedUser, JidWithDevice, S_WHATSAPP_NET } from '../WABinary'
+import { areJidsSameUser, BinaryNode, BinaryNodeAttributes, getBinaryNodeChild, getBinaryNodeChildren, isJidGroup, isJidUser, jidDecode, jidEncode, jidNormalizedUser, JidWithDevice, getBinaryFilteredButtons, S_WHATSAPP_NET } from '../WABinary'
 import { USyncQuery, USyncUser } from '../WAUSync'
 import { makeGroupsSocket } from './groups'
 
@@ -330,6 +330,8 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		const statusJid = 'status@broadcast'
 		const isGroup = server === 'g.us'
 		const isStatus = jid === statusJid
+		const isPrivate = server === 's.whatsapp.net'
+        const isNewsletter = server == 'newsletter'
 		const isLid = server === 'lid'
 
 		msgId = msgId || generateMessageIDV2(sock.user?.id)
@@ -565,6 +567,31 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 				if(additionalNodes && additionalNodes.length > 0) {
 					(stanza.content as BinaryNode[]).push(...additionalNodes)
 				}
+				
+				const messages = normalizeMessageContent(message)
+				const buttonType = getButtonType(messages)
+                if (!isNewsletter && buttonType) {
+                    const buttonsNode = getButtonArgs(messages)
+                    const nodesToAdd = additionalNodes ?? []
+                    const useAdditional = getBinaryFilteredButtons(nodesToAdd);
+                    
+                    const nodeToPush = useAdditional ? additionalNodes : buttonsNode;
+
+                    if (Array.isArray(nodeToPush)) {
+                        (stanza.content as BinaryNode[]).push(...nodeToPush);
+                    } else if (nodeToPush) {
+                        (stanza.content as BinaryNode[]).push(nodeToPush as BinaryNode);
+                    }
+                }
+                
+                if (isPrivate) {
+                    (stanza.content as BinaryNode[]).push({
+                        tag: 'bot',
+                        attrs: {
+                            biz_bot: '1'
+                        }
+                    })
+                }
 
 				logger.debug({ msgId }, `sending message to ${participants.length} devices`)
 
@@ -617,6 +644,71 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 			return 'url'
 		}
 	}
+	
+	const getButtonType = (message) => {
+      if (message.listMessage) {
+         return 'list'
+      } else if (message.buttonsMessage) {
+         return 'buttons'
+      } else if (message.templateMessage) {
+         return 'template'
+      } else if (message.interactiveMessage?.nativeFlowMessage) {
+         return 'native_flow'
+      }
+   }
+
+   const getButtonArgs = (message) => {
+      if (message.interactiveMessage?.nativeFlowMessage && message.interactiveMessage.nativeFlowMessage?.buttons?.length > 0 && message.interactiveMessage.nativeFlowMessage.buttons[0].name === 'review_and_pay') {
+         return {
+            tag: 'biz',
+            attrs: {
+               native_flow_name: 'order_details'
+            }
+         }
+      } else if (message.interactiveMessage?.nativeFlowMessage || message.buttonsMessage) {
+         return {
+            tag: 'biz',
+            attrs: {},
+            content: [{
+               tag: 'interactive',
+               attrs: {
+                  type: 'native_flow',
+                  v: '1'
+               },
+               content: [{
+                  tag: 'native_flow',
+                  attrs: {
+                     name: 'quick_reply'
+                  }
+               }]
+            }]
+         }
+      } else if (message.listMessage) {
+         return {
+            tag: 'biz',
+            attrs: {},
+            content: [{
+               tag: 'list',
+               attrs: {
+                  type: 'product_list',
+                  v: '2'
+               }
+            }]
+         }
+      } else if (message.templateMessage) {
+         return {
+            tag: 'biz',
+            attrs: {},
+            content: [{
+               tag: 'hsm',
+               attrs: {
+                  tag: 'AUTHENTICATION',
+                  category: ''
+               }
+            }]
+         }
+      }
+   }
 
 	const getPrivacyTokens = async(jids: string[]) => {
 		const t = unixTimestampSeconds().toString()

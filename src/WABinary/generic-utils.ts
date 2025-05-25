@@ -119,3 +119,28 @@ export function binaryNodeToString(node: BinaryNode | BinaryNode['content'], i =
 
 	return tag + content
 }
+
+export const getBinaryFilteredButtons = (nodeContent: any): boolean => {
+  if (!Array.isArray(nodeContent)) {
+    nodeContent = [[nodeContent]];
+  }
+
+  const filter = nodeContent.filter((item: any[]) =>
+    !(
+      item.some((tag: any) =>
+        tag.tag === 'biz' &&
+        tag.content &&
+        tag.content.some((innerTag: any) =>
+          (innerTag.tag === 'interactive' &&
+            innerTag.attrs?.type === 'native_flow' &&
+            innerTag.attrs?.v === '1') ||
+          (innerTag.tag === 'list' &&
+            innerTag.attrs?.type === 'product_list' &&
+            innerTag.attrs?.v === '2')
+        )
+      )
+    )
+  );
+
+  return filter.length > 0;
+};
