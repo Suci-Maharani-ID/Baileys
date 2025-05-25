@@ -50,7 +50,7 @@ export const useSingleFileAuthState = async (file: string): Promise<{
 
   const saved = await readFullState()
   const creds: AuthenticationCreds = saved.creds || initAuthCreds()
-  let keys = saved.keys || {}
+  const keys = saved.keys || {}
 
   return {
     state: {
@@ -68,24 +68,14 @@ export const useSingleFileAuthState = async (file: string): Promise<{
           return data
         },
         set: async dataToSet => {
-          const newKeys: Record<string, any> = {}
-
           for (const category in dataToSet) {
             for (const id in dataToSet[category]) {
               const compositeKey = `${category}-${id}`
               const value = dataToSet[category][id]
-              if (value) newKeys[compositeKey] = value
+              if (value) keys[compositeKey] = value
+              else delete keys[compositeKey]
             }
           }
-          
-          for (const key in keys) {
-            if (!(key in newKeys)) {
-              delete keys[key]
-            }
-          }
-
-          // Tambahkan/replace key baru
-          keys = { ...keys, ...newKeys }
           
           await writeFullState({ creds, keys })
         }
