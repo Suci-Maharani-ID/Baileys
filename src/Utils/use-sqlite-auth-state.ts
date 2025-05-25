@@ -7,26 +7,27 @@ import { BufferJSON } from './generics'
 
 let Database: any
 
-try {
-  Database = (await import('bun:sqlite')).Database
-} catch {
-  Database = (await import('better-sqlite3')).default
+async function initializeDatabase() {
+  try {
+    // @ts-ignore
+    const mod = await import('bun:sqlite')
+    return mod.Database
+  } catch {
+    const mod = await import('better-sqlite3')
+    return mod.default
+  }
 }
 
-type InternalAuthState = {
-  creds: AuthenticationCreds
-}
-
-export const useSQLiteAuthState = (file: string): {
+export const useSQLiteAuthState = (file: string): Promise<{
   state: AuthenticationState,
   saveCreds: () => void
-} => {
+}> => initializeDatabase().then((DB) => {
   const dbPath = join(file)
   const folder = join(dbPath, '..')
 
   if (!existsSync(folder)) mkdirSync(folder, { recursive: true })
 
-  const db = new Database(dbPath)
+  const db = new DB(dbPath)
 
   db.prepare?.(`
     CREATE TABLE IF NOT EXISTS creds (
@@ -122,4 +123,4 @@ export const useSQLiteAuthState = (file: string): {
     },
     saveCreds
   }
-}
+})
