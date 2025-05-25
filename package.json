@@ -61,7 +61,7 @@
     "jimp": "^0.16.1",
     "link-preview-js": "^3.0.0",
     "sharp": "^0.32.6",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^11.10.0"
   },
   "peerDependenciesMeta": {
     "audio-decode": {
