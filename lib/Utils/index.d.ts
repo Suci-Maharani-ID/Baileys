@@ -16,3 +16,4 @@ export * from './link-preview';
 export * from './event-buffer';
 export * from './process-message';
 export * from './use-encrypted-multi-file-auth-state';
+export * from './use-single-file-auth-state';
