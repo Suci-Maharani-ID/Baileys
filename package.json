@@ -1,6 +1,6 @@
 {
   "name": "baileys",
-  "version": "6.7.22",
+  "version": "6.8.0",
   "description": "A WebSockets library for interacting with WhatsApp Web",
   "keywords": [
     "whatsapp",
@@ -23,6 +23,9 @@
   ],
   "scripts": {
     "build": "tsc",
+    "changelog:last": "conventional-changelog -p angular -r 2",
+    "changelog:preview": "conventional-changelog -p angular -u",
+    "changelog:update": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
     "example": "bun Example/example.ts",
     "gen:protobuf": "sh WAProto/GenerateStatics.sh",
     "lint": "eslint src --ext .js,.ts",
