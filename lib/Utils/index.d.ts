@@ -18,3 +18,4 @@ export * from './process-message';
 export * from './use-encrypted-multi-file-auth-state';
 export * from './use-single-file-auth-state';
 export * from './use-buffered-single-file-auth-state';
+export * from './use-sqlite-auth-state';
