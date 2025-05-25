@@ -272,15 +272,14 @@ export const fetchLatestBaileysVersion = async(options: AxiosRequestConfig<{}> =
  * A utility that fetches the latest web version of whatsapp.
  * Use to ensure your WA connection is always on the latest version
  */
-export const fetchLatestWaWebVersion = async(options: AxiosRequestConfig<{}>) => {
+export const fetchLatestWaWebVersion = async(options: RequestInit = {}) => {
 	try {
-		const { data } = await axios.get(
-			'https://web.whatsapp.com/sw.js',
-			{
-				...options,
-				responseType: 'json'
-			}
-		)
+		const res = await fetch('https://web.whatsapp.com/sw.js', {
+            method: 'GET',
+            ...options
+        })
+
+        const data = await res.text()
 
 		const regex = /\\?"client_revision\\?":\s*(\d+)/
 		const match = data.match(regex)
@@ -476,15 +475,19 @@ export function createSimpleCache(ttlMs: number = 5 * 60 * 1000) {
     store.clear()
   }
 
-  // optional: automatic cleanup
-  setInterval(() => {
-    const now = Date.now()
-    for (const [key, entry] of store.entries()) {
-      if (now > entry.expires) {
-        store.delete(key)
-      }
-    }
-  }, ttlMs)
-
   return { get, set, del, flushAll }
+}
+
+/**
+ * Splits an array into multiple groups of a specified size
+ * @param arr - the source array
+ * @param size - number of elements per group
+ * @returns array of grouped sub-arrays
+ */
+export function chunk<T>(arr: T[], size: number): T[][] {
+  const result: T[][] = []
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size))
+  }
+  return result
 }

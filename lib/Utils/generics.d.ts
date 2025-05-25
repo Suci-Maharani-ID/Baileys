@@ -51,7 +51,7 @@ export declare const fetchLatestBaileysVersion: (options?: AxiosRequestConfig<{}
  * A utility that fetches the latest web version of whatsapp.
  * Use to ensure your WA connection is always on the latest version
  */
-export declare const fetchLatestWaWebVersion: (options: AxiosRequestConfig<{}>) => Promise<{
+export declare const fetchLatestWaWebVersion: (options?: RequestInit) => Promise<{
     version: WAVersion;
     isLatest: boolean;
     error?: undefined;
@@ -94,3 +94,10 @@ export declare function createSimpleCache(ttlMs?: number): {
     del: (key: string) => void;
     flushAll: () => void;
 };
+/**
+ * Splits an array into multiple groups of a specified size
+ * @param arr - the source array
+ * @param size - number of elements per group
+ * @returns array of grouped sub-arrays
+ */
+export declare function chunk<T>(arr: T[], size: number): T[][];
