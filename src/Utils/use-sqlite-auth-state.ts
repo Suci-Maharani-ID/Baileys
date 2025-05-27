@@ -6,12 +6,12 @@ async function initializeDatabase() {
     const mod = await import('bun:sqlite')
     return mod.Database
   } catch {
+    // @ts-ignore
     const mod = await import('better-sqlite3')
     return mod.default
   }
 }
 
-import { join } from 'path'
 import { proto } from '../../WAProto'
 import { AuthenticationCreds, AuthenticationState, SignalDataTypeMap } from '../Types'
 import { initAuthCreds } from './auth-utils'
@@ -49,8 +49,7 @@ export const useSQLiteAuthState = async (dbPath: string): Promise<{
       get: async (type, ids) => {
         const data: { [_: string]: SignalDataTypeMap[typeof type] } = {}
         for (const id of ids) {
-          const row = db.prepare('SELECT value FROM keys WHERE category = ? AND id = ?')
-                          .get(type, id)
+          const row = db.prepare('SELECT value FROM keys WHERE category = ? AND id = ?').get(type, id)
           if (row) {
             let value = JSON.parse(row.value, BufferJSON.reviver)
             if (type === 'app-state-sync-key') {
